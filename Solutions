@@ -180,8 +180,19 @@ def DayFour():
 
     while True:
         digits += 1
-        if md5(b'%s%s' % (key, bytes(str(digits), 'utf-8'))).hexdigest()[:5] == '000000': # remove one zero in this string for puzzle one
+        if md5(b'%s%s' % (key, bytes(str(digits), 'utf-8'))).hexdigest()[:6] == '000000': # remove one zero in this string and change index to [:5] for puzzle one
             print(digits)
             break
         
-DayFour()
+def DayFive1():
+
+    nice = 0
+
+    with open('/Users/Zak/Documents/Programs/Website Challenges/Day 5 Input.txt', 'r') as f:
+        for line in f.readlines():
+            if len([x for x in line if x in 'aeiou']) > 2 and len([line[x-1:x+1] for x in range(1, len(line)) if line[x] == line[x-1]]) > 0 and len([line[x-1:x+1] for x in range(1, len(line)) if line[x-1:x+1] in ['ab', 'cd', 'pq', 'xy']]) == 0:
+                nice += 1
+                
+        print(nice)
+                
+DayFive1()
