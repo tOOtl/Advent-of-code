@@ -171,8 +171,17 @@ def DayThree2():
     print(housesHit)
     
 
-def DayFour1():
+def DayFour():
 
-    key = 'bgvyzdsv'
+    from hashlib import md5
 
-    
+    key = b'bgvyzdsv'
+    digits = 0
+
+    while True:
+        digits += 1
+        if md5(b'%s%s' % (key, bytes(str(digits), 'utf-8'))).hexdigest()[:5] == '000000': # remove one zero in this string for puzzle one
+            print(digits)
+            break
+        
+DayFour()
