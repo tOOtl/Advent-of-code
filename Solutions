@@ -194,5 +194,16 @@ def DayFive1():
                 nice += 1
                 
         print(nice)
+
+def DayFive2():
+
+    nice = 0
+
+    with open('/Users/Zak/Documents/Programs/Website Challenges/Day 5 Input.txt', 'r') as f:
+        for line in f.readlines():
+            if len([line[x-2:x] for x in range(2, len(line)) if line[x-2:x] in line[x:]]) > 0 and len([line[x:x+3] for x in range(len(line) - 2) if line[x] == line[x+2]]) > 0:
+                nice += 1
                 
-DayFive1()
+        print(nice)
+        
+DayFive2()
