@@ -206,4 +206,79 @@ def DayFive2():
                 
         print(nice)
         
-DayFive2()
+def DaySix1():
+
+    def lights(grid, instruction, l, r, u, d):
+        for y in range(u, d + 1):
+            for x in range(l, r + 1):
+                if instruction == 'on':
+                    grid[y][x] = 'X'
+                elif instruction == 'off':
+                    grid[y][x] = ' '
+                elif instruction == 'oggle':
+                    if grid[y][x] == 'X':
+                        grid[y][x] = ' '
+                    elif grid[y][x] == ' ':
+                        grid[y][x] = 'X'
+
+    grid = [[' ' for x in range(1000)] for y in range(1000)]
+    total = 0
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 6 Input.txt'
+    with open(file, 'r') as f:
+        for line in f.readlines():
+            line = line.strip('turn \n').split()
+
+            topLeft, bottomRight = line[1].split(','), line[3].split(',')
+
+            l, r, u, d = int(topLeft[0]), int(bottomRight[0]), int(topLeft[1]), int(bottomRight[1])
+
+            lights(grid, line[0], l, r, u, d)
+
+        for row in grid:
+            total += row.count('X')
+
+        print(total)
+
+def DaySix2():
+
+    def lights(grid, instruction, l, r, u, d):
+        for y in range(u, d + 1):
+            for x in range(l, r + 1):
+                if instruction == 'on':
+                    grid[y][x] += 1
+                elif instruction == 'off' and grid[y][x] != 0:
+                    grid[y][x] -= 1
+                elif instruction == 'oggle':
+                    grid[y][x] += 2
+
+    grid = [[0 for x in range(1000)] for y in range(1000)]
+    total = 0
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 6 Input.txt'
+    with open(file, 'r') as f:
+        for line in f.readlines():
+            line = line.strip('turn \n').split()
+
+            topLeft, bottomRight = line[1].split(','), line[3].split(',')
+
+            l, r, u, d = int(topLeft[0]), int(bottomRight[0]), int(topLeft[1]), int(bottomRight[1])
+
+            lights(grid, line[0], l, r, u, d)
+
+        for row in grid:
+            total += sum(row)
+
+        print(total) 
+            
+
+            
+            
+        
+
+
+DaySix2()
+
+
+
+
