@@ -270,14 +270,108 @@ def DaySix2():
             total += sum(row)
 
         print(total) 
-            
 
-            
-            
+                
+
+def DaySeven1():
+
+    def evalWire(wire, depth):
+        print(wire)
+        print(depth)
+        '''
+        operation = wires[wire]
+        print(operation)'''
+        try:
+            int(wire)
+##            print('evaluated %s' % int(wire))
+            depth -= 1
+            return int(wire)
+            '''
+#            print('evaluated %s' % wire)
+            if len(operation) == 1:
+                return int(operation[0]) # once it gets back to a number, return that as an int
+            else:
+                raise ValueError'''
         
+        except ValueError:
+            operation = wires[wire]
+##            print('%s %s' % (operation, wire))
+            if len(operation) == 1:
+                return evalWire(operation[0], depth + 1) # if it's a wire name only (no operation) or a number, evaluate the input and return it
+            elif len(operation) == 2:
+                '''if len(bin(evalWire(operation[1]))) < 18:
+                    string = bin(evalWire(operation[1]))
+                    print(string)
+                    string = string[2:].zfill(16)
+                    print(string)
+                    thing = ''.join([['1','0'][int(x)] for x in string])
+                    print(thing)'''
+#                print(bin(evalWire(operation[1])))
+#                print(bin(65535 - evalWire(operation[1])))
+                return 65535 - evalWire(operation[1], depth+1) # if it's a NOT gate, evaluate the input and return the NOT of it NEED THIS TO BE 16BIT
+            else:
+                if 'AND' in operation:
+                    return evalWire(operation[0], depth+1) & evalWire(operation[2], depth+1) # if it's an AND gate, evaluate the inputs and return their AND
+                elif 'OR' in operation:
+                    return evalWire(operation[0], depth+1) | evalWire(operation[2], depth+1) # if it's an OR gate, evaluate the inputs and return their OR
+                elif 'LSHIFT' in operation:
+                    return evalWire(operation[0], depth+1) << int(operation[2]) # if it's an LSHIFT, evaluate the input and shift it the appropriate number left
+                elif 'RSHIFT' in operation:
+                    return evalWire(operation[0], depth+1) >> int(operation[2]) # if it's an RSHIFT, evaluate the input and shift it the appropriate number right
 
+    def evalWire(wire, depth):
 
-def DaySeven1(): 
+        depth += 1
+
+        print(depth)
+
+        if type(wires[wire]) == int:
+            return wires[wire]
+
+        try:
+            print(int(wire))
+            depth -= 1
+            return int(wire)
+        
+        except ValueError:
+            operation = wires[wire]
+            if len(operation) == 1: # number or single wire case
+                wires[wire] = evalWire(operation[0], depth)
+                return evalWire(operation[0], depth)
+            elif len(operation) == 2: # NOT case
+                return 65535 - evalWire(operation[1], depth)
+            else:
+                if 'AND' in operation: # AND case
+                    return evalWire(operation[0], depth) & evalWire(operation[2], depth)
+                elif 'OR' in operation: # OR case
+                    return evalWire(operation[0], depth) | evalWire(operation[2], depth)
+                elif 'LSHIFT' in operation: # LSHIFT case
+                    return evalWire(operation[0], depth) << int(operation[2])
+                elif 'RSHIFT' in operation: # RSHIFT case
+                    return evalWire(operation[0], depth) >> int(operation[2])
+            
+
+    wires = {}
+    
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 7 Input.txt'
+    with open(file, 'r') as f:
+        for line in f.readlines():
+            wires[line.split()[-1]] = line.split()[:-2]
+
+#    for i in wires:
+#        print(wires[i])
+    
+    print(evalWire('a', 0))
+'''
+    wires = {'x':['123'], 'y': ['456'], 'd': ['x', 'AND', 'y'], 'e': ['x', 'OR', 'y'], 'f':['x', 'LSHIFT', '2'], 'g':['y', 'RSHIFT', '2'], 'h': ['NOT', 'x'], 'i': ['NOT', 'y']}
+        
+    for i in list('xydefghi'):
+        print('%s equals %s' % (i, evalWire(i)))
+'''
+            
+            
+def DaySeven1():
 
     def evalWire(operation):
         
@@ -364,38 +458,80 @@ def DaySeven2():
 
 
 
+def DayEight1():
 
+    import re
 
-def DayEight1():   ### DOES NOT WORK, WORK IN PROGRESS
-    
-    def getDataLength(line):
-        backline = line[::-1]
-        chars = []
-        for i in range(len(line)):
-            pass
-        
-            
-
-    literalLength = 0
-    storedChars = []
+    an = re.compile('\w')
+    dq = re.compile(r'\\\"')
+    bs = re.compile(r'\\\\')
+    uc = re.compile(r'\\x[0123456789abcdef]{2,2}')
 
     file = '/Users/Zak/Documents/Programs/Website Challenges/Day 8 Input.txt'
 
     with open(file, 'r') as f:
-        for line in f.readlines():
-            for i in range(1, len(line)):
-                if line[i - 1:i] == ' ':
-                    print(line[i-1:i+2])
-            storedChars.extend([i for i in line[1:-2]])
-            literalLength += len([line[1:-2][x] for x in range(len(line[1:-2]))])
+        lines = f.readlines()
+#        lines = [f.readline() for i in range(20)]
 
-    print(len(storedChars))
-    print(literalLength)
+    codeTotal = 0
+    memTotal = 0
+
+    for line in lines:
+        '''
+        print('line:')
+        print(line)
+        print(len(line))
+
+        print('alphanumeric:')
+        print(an.findall(line))
+        print(len(an.findall(line)))
+
+        print('double quotes:')
+        print(dq.findall(line))
+        print(len(dq.findall(line)))
+
+        print('backslashes:')
+        print(bs.findall(line))
+        print(len(bs.findall(line)))
+        
+
+        if len(line) - 1 != len(an.findall(line)) + 2*len(dq.findall(line)) + 2*len(bs.findall(line)) + len(uc.findall(line)) + 2:
+            print(line)
+            print(len(an.findall(line)) + 2*len(dq.findall(line)) + 2*len(bs.findall(line)) + len(uc.findall(line)) + 2)
+            print(bs.findall(line))
+            print(dq.findall(line))
+        '''
+        codeTotal += len(line) - 1
+        # the codeTotal below is getting the wrong answer for lines that end in \\, because it counts as
+        # both a backslash and an escaped quote. stripping the line first should help.
+#        codeTotal += len(an.findall(line)) + 2*len(dq.findall(line)) + 2*len(bs.findall(line)) + len(uc.findall(line)) + 2
+
+#        print('code total:')
+#        print(len(an.findall(line)) + 2*len(dq.findall(line)) + 2*len(bs.findall(line)) + len(uc.findall(line)) + 2)
+
+        line = line.strip('\n"')
+        '''
+        print('unicode:')
+        print(uc.findall(line))
+        print(len(uc.findall(line)))
+
+        print('len(line) after strip:')
+        print(len(line))
+        '''
+        memTotal += len(line) - 3*len(uc.findall(line)) - len(dq.findall(line)) - len(bs.findall(line))
+#        print('mem total:')
+#        print(len(line) - 3*len(uc.findall(line)) - len(dq.findall(line)) - len(bs.findall(line)))
+        
+#        print('-'*20)
+
+    print(codeTotal - memTotal)
+
+DayEight1()
+        
+        
 
 
-
-
-def DayNine1():   ### DOES NOT WORK, WORK IN PROGRESS
+def DayNine1():
 
     def trimRoutes(routes, visited):
         new = []
@@ -488,9 +624,55 @@ def DayTen1():
 
     print(len(n))
 
-DayTen1()
+
+def DayEleven1():
+
+    def rule1(passnum):
+        for i in range(2, len(passnum)):
+            try:
+                if passnum[i] == passnum[i-1] + 1 == passnum[i-2] + 2:
+                    return True
+            except IndexError:
+                print('i = {}, passnum = {}'.format(i, passnum))
+        return False
+
+    def rule2(passnum):
+        for letter in [8, 11, 14]:
+            if letter in passnum:
+                for i in range(passnum.index(letter) + 1, len(passnum)):
+                    passnum[i] = 0
+                passnum[passnum.index(letter)] += 1
+                return False
+        return True
+
+    def rule3(passnum):
+        pairs = []
+        for i in range(len(passnum) - 1):
+            if passnum[i] == passnum[i+1] and passnum[i] not in pairs:
+                pairs.append(passnum[i])
+        return len(pairs) >= 2        
+
+    def increment(passnum):
+        passnum[-1] += 1
+        for i in range(len(passnum)):
+            if passnum[len(passnum) - (i+1)] == 26:
+                passnum[len(passnum) - (i+1)] = 0
+                passnum[len(passnum) - (i+2)] += 1
+                
+
+    password = 'cqjxjnds'
+    alph = 'abcdefghijklmnopqrstuvwxyz'
+
+    passnum = []
+    for i in password:
+        passnum.append(alph.find(i))
+
+    count = 0
+    while not (rule1(passnum) and rule2(passnum) and rule3(passnum)):
+        increment(passnum)
+        count += 1
+
+    print(''.join([alph[x] for x in passnum]))
 
 
-
-
-
+        
