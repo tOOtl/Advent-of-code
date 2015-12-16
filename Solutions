@@ -508,7 +508,7 @@ def DayEight1():
 
 #        print('code total:')
 #        print(len(an.findall(line)) + 2*len(dq.findall(line)) + 2*len(bs.findall(line)) + len(uc.findall(line)) + 2)
-
+        # not sure if this strip should cause issues with lines ending \"" but it seems to work...
         line = line.strip('\n"')
         '''
         print('unicode:')
@@ -526,7 +526,35 @@ def DayEight1():
 
     print(codeTotal - memTotal)
 
-DayEight1()
+def DayEight2():
+
+    import re
+
+    an = re.compile('\w')
+    dq = re.compile(r'\\\"')
+    bs = re.compile(r'\\\\')
+    uc = re.compile(r'\\x[0123456789abcdef]{2,2}')
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 8 Input.txt'
+
+    with open(file, 'r') as f:
+        lines = f.readlines()
+#        lines = [f.readline() for i in range(20)]
+
+    originalCodeTotal = 0
+    encodedTotal = 0
+
+    for line in lines:
+
+        line = line[1:-2]
+
+        originalCodeTotal += len(line) - 1
+
+        encodedTotal += len(line) + 3 + len(uc.findall(line)) + 2*len(dq.findall(line)) + 2*len(bs.findall(line))
+        #                   outer quotes    \ for unicode       \\ for quotes               \\ for backslash
+
+    print(encodedTotal - originalCodeTotal)
+
         
         
 
@@ -625,6 +653,7 @@ def DayTen1():
     print(len(n))
 
 
+
 def DayEleven1():
 
     def rule1(passnum):
@@ -660,7 +689,7 @@ def DayEleven1():
                 passnum[len(passnum) - (i+2)] += 1
                 
 
-    password = 'cqjxjnds'
+    password = 'cqjxxyzz'
     alph = 'abcdefghijklmnopqrstuvwxyz'
 
     passnum = []
@@ -668,11 +697,422 @@ def DayEleven1():
         passnum.append(alph.find(i))
 
     count = 0
-    while not (rule1(passnum) and rule2(passnum) and rule3(passnum)):
+    while not (rule1(passnum) and rule2(passnum) and rule3(passnum)) or count == 0:
         increment(passnum)
         count += 1
 
     print(''.join([alph[x] for x in passnum]))
 
+        
+
+def dayTwelve1():
+
+    import re
+
+    n = re.compile('-?\d+')
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 12 Input.txt'
+
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    nums = []
+    for line in lines:
+        nums.extend(n.findall(line))
+
+    print('\n'.join(nums))
+
+    for i in range(len(nums)):
+        nums[i] = int(nums[i])
+
+    print(sum(nums))
+
+'''        
+def dayTwelve2(): # red currently doesn't work as it will stop at "{"red"{{}" rather than "{"red"{{}}}"
+
+    import re
+
+    n = re.compile('-?\d+')
+    red = re.compile('\{[^}[]*\"red\"[^}]*\}')
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 12 Input.txt'
+
+    with open(file, 'r') as f:
+        lines = f.readline()
+
+    nums = n.findall(lines)
+
+    redobjects = red.findall(lines)
+
+    rednums = []
+    for d in redobjects:
+        rednums.extend(n.findall(d))
+
+    for d in redobjects:
+        print(d)
+        print(n.findall(d))
+    
+    for i in range(len(nums)):
+        nums[i] = int(nums[i])
+    for i in range(len(rednums)):
+        rednums[i] = int(rednums[i])
+
+    print(sum(nums) - sum(rednums))
+'''
+
+def dayTwelve2():
+
+    import re
+
+    openBrace = re.compile('\{')
+    closeBrace = re.compile('\}')
+    red = re.compile('\{[^}[]*\"red\"[^}]*\}')
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 12 Input.txt'
+
+    with open(file, 'r') as f:
+        stuff = f.readline()
 
         
+    '''
+    # find { character
+    # from that index, look for { or }
+    # if { go back to start
+    # if } separate out (maybe check for "red" here)
+
+    # could try counting open braces and close braces
+    # if "red" is found, ignore until count drops below the level at which it was found'''
+
+    # make a list of all indices at which "red" occurs
+
+    count = 0
+
+    reds = []
+    start = 0
+    count = 0
+    while True:
+        count += 1
+        r = start + stuff[start:].find('\"red\"')
+        if r == start-1:
+            break
+        reds.append(r)
+        start += stuff[start:].find('\"red\"') + 5
+
+    print(len(reds))
+
+# find the { before that, and find when that object ends
+
+    for index in reds:
+        pass
+        
+
+
+    
+# list all the start and end indices of these objects
+# run dayTwelve1() on the remaining input
+        
+
+
+        
+
+#dayTwelve2()
+    
+
+
+def dayFourteen1():
+
+    def reindeer(v, t, rest, total):
+
+        elapsed = 0
+        dist = 0
+
+        while elapsed + rest + t <= total:
+            dist += v*t
+            elapsed += t + rest
+
+        if t <= total - elapsed:
+            dist += v*t
+        else:
+            dist += v*(total - elapsed)
+
+        return dist
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 14 Input.txt'
+
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    deer = [[line.split()[0], int(line.split()[3]), int(line.split()[6]), int(line.split()[-2])] for line in lines]
+
+    furthest = 0
+
+    for d in deer:
+        print('{name} travelled {dist}km'.format(name = d[0], dist = reindeer(d[1], d[2], d[3], 2503)))
+        if reindeer(d[1], d[2], d[3], 2503) > furthest:            
+            furthest = reindeer(d[1], d[2], d[3], 2503)
+
+    print(furthest)
+        
+        
+            
+def dayFourteen2():
+
+    def reindeer(v, t, rest, total):
+
+        elapsed = 0
+        dist = 0
+
+        while elapsed + rest + t <= total:
+            dist += v*t
+            elapsed += t + rest
+
+        if t <= total - elapsed:
+            dist += v*t
+        else:
+            dist += v*(total - elapsed)
+
+        return dist
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 14 Input.txt'
+
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    deer = [[line.split()[0], int(line.split()[3]), int(line.split()[6]), int(line.split()[-2])] for line in lines]
+    scores = {d[0]:0 for d in deer}
+
+    second = 0
+    total = 2503
+    furthest = 0
+    
+    while second <= total:
+        second += 1
+        for d in deer:
+            if reindeer(d[1], d[2], d[3], second) > furthest:            
+                furthest = reindeer(d[1], d[2], d[3], second)
+                lead = d[0]
+        scores[lead] += 1
+
+    print(scores)  
+        
+    
+
+def dayFifteen1():
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 15 Input.txt'
+    with open(file, 'r') as f:
+        ings = {}
+        for line in f.readlines():
+            l = line.split()
+            ings[l[0][:-1]] = [int(l[2][:-1]), int(l[4][:-1]), int(l[6][:-1]), int(l[8][:-1]), int(l[10])]
+
+    '''
+    ings = {'Butterscotch': [-1, -2, 6, 3, 8],
+        'Cinammon': [2, 3, -2, -1, 3]}
+
+    optimum = 0
+    for but in range(101):
+                cin = 100 - but
+                print('cinammon: {}, buttercotch: {}'.format(cin, but))
+                scores = [(cin*ings['Cinammon'][a] + but*ings['Butterscotch'][a]) for a in range(4)]
+                print(scores)
+                total = 1
+                for s in range(len(scores)):
+                    if scores[s] < 0:
+                        break                   
+                    print('{} x {} = {}'.format(total, scores[s], total*scores[s]))
+                    total *= scores[s]
+                optimum = max(total, optimum)
+                print('max = {}'.format(optimum))
+                print()
+    '''
+    
+    optimum = 0
+    for spr in range(101):
+        for butt in range(101 - spr):
+            for choc in range(101 - (spr+butt)):
+                cand = 100 - (spr+butt+choc)
+                scores = [(spr*ings['Sprinkles'][a] + butt*ings['Butterscotch'][a] + choc*ings['Chocolate'][a] + cand*ings['Candy'][a]) for a in range(4)]
+                total = 1
+                for s in range(len(scores)):
+                    if scores[s] < 0:
+                        break
+                    total *= scores[s]
+                optimum = max(total, optimum)
+
+    print(optimum)
+
+def fifteen1speed(n): # n = number of trials of each. Takes approx 11*n seconds (on laptop)
+
+    def dayFifteen1Slow():
+
+        start = time.time()
+
+        optimum = 0
+        for spr in range(101):
+            for butt in range(101):
+                for choc in range(101):
+                    cand = 100 - (spr+butt+choc)
+                    scores = [(spr*ings['Sprinkles'][a] + butt*ings['Butterscotch'][a] + choc*ings['Chocolate'][a] + cand*ings['Candy'][a]) for a in range(4)]
+                    total = 1
+                    for s in range(len(scores)):
+                        if scores[s] < 0:
+                            scores[s] = 0
+                        total *= scores[s]
+                    optimum = max(total, optimum)
+
+        return time.time() - start
+
+    def dayFifteen1Fast():
+
+        start = time.time()
+
+        optimum = 0
+        for spr in range(101):
+            for butt in range(101 - spr):
+                for choc in range(101 - (spr+butt)):
+                    cand = 100 - (spr+butt+choc)
+                    scores = [(spr*ings['Sprinkles'][a] + butt*ings['Butterscotch'][a] + choc*ings['Chocolate'][a] + cand*ings['Candy'][a]) for a in range(4)]
+                    total = 1
+                    for s in range(len(scores)):
+                        if scores[s] < 0:
+                            break
+                        total *= scores[s]
+                    optimum = max(total, optimum)
+
+        return time.time() - start
+    
+    import time
+    
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 15 Input.txt'
+    with open(file, 'r') as f:
+        ings = {}
+        for line in f.readlines():
+            l = line.split()
+            ings[l[0][:-1]] = [int(l[2][:-1]), int(l[4][:-1]), int(l[6][:-1]), int(l[8][:-1]), int(l[10])]
+
+    fast = []
+    slow = []
+    
+    for i in range(n):
+        fast.append(dayFifteen1Fast())
+        slow.append(dayFifteen1Slow())
+
+    def avg(j):
+        return sum(j)/len(j)
+
+    print('Fast = {}\nSlow = {}\nPercentage = {}%'.format(avg(fast), avg(slow), (avg(fast)/avg(slow))*100))
+        
+    
+
+
+def dayFifteen2():
+    
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 15 Input.txt'
+    with open(file, 'r') as f:
+        ings = {}
+        for line in f.readlines():
+            l = line.split()
+            ings[l[0][:-1]] = [int(l[2][:-1]), int(l[4][:-1]), int(l[6][:-1]), int(l[8][:-1]), int(l[10])]
+
+    optimum = 0
+    for spr in range(101):
+        for butt in range(101 - spr):
+            for choc in range(101 - (spr+butt)):
+                cand = 100 - (spr+butt+choc)
+                if spr*ings['Sprinkles'][4] + butt*ings['Butterscotch'][4] + choc*ings['Chocolate'][4] + cand*ings['Candy'][4] != 500:
+                    continue
+                scores = [(spr*ings['Sprinkles'][a] + butt*ings['Butterscotch'][a] + choc*ings['Chocolate'][a] + cand*ings['Candy'][a]) for a in range(4)]
+                total = 1
+                for s in range(len(scores)):
+                    if scores[s] < 0:
+                        break
+                    total *= scores[s]
+                optimum = max(total, optimum)
+
+    print(optimum)                   
+                    
+
+
+def DaySixteen1():
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 16 Input.txt'
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    sues = {}
+    for line in lines:
+        l = line.split()
+        sues[int(l[1][:-1])] = {
+            l[2][:-1]:int(l[3][:-1]),
+            l[4][:-1]:int(l[5][:-1]),
+            l[6][:-1]:int(l[7])
+            }
+
+    auntSue = {x.split()[0][:-1]:int(x.split()[1]) for x in '''children: 3
+    cats: 7
+    samoyeds: 2
+    pomeranians: 3
+    akitas: 0
+    vizslas: 0
+    goldfish: 5
+    trees: 3
+    cars: 2
+    perfumes: 1'''.split('\n')}
+
+    
+    for n in range(1, 501):
+        count = 0
+        for i in auntSue.keys():
+            try:
+                if sues[n][i] == auntSue[i]:
+                    count += 1
+            except KeyError:
+                continue
+        if count == 3:
+            print(n)
+
+def DaySixteen2():
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 16 Input.txt'
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    sues = {}
+    for line in lines:
+        l = line.split()
+        sues[int(l[1][:-1])] = {
+            l[2][:-1]:int(l[3][:-1]),
+            l[4][:-1]:int(l[5][:-1]),
+            l[6][:-1]:int(l[7])
+            }
+
+    auntSue = {x.split()[0][:-1]:int(x.split()[1]) for x in '''children: 3
+    cats: 7
+    samoyeds: 2
+    pomeranians: 3
+    akitas: 0
+    vizslas: 0
+    goldfish: 5
+    trees: 3
+    cars: 2
+    perfumes: 1'''.split('\n')}
+
+    
+    for n in range(1, 501):
+        count = 0
+        for i in auntSue.keys():
+            try:
+                if i == 'cats' or i == 'trees':
+                    if sues[n][i] > auntSue[i]:
+                        count += 1
+                elif i == 'goldfish' or i == 'pomeranians':
+                    if sues[n][i] < auntSue[i]:
+                        count += 1
+                else:
+                    if sues[n][i] == auntSue[i]:
+                        count += 1
+            except KeyError:
+                continue
+        if count == 3:
+            print(n)
