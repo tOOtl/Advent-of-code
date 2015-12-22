@@ -616,9 +616,40 @@ def DayNine1():
         
         
 
+def dayNine1():
 
+    import itertools
 
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 9 Input.txt'
+
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    routes = [(line.split()[0], line.split()[2], line.split()[4]) for line in lines]
+
+    places = set([line.split()[0] for line in lines] + ['Arbre'])
+
+    poss = {}
     
+    for x in itertools.combinations(routes, 7):
+        check = {m:0 for m in places}
+        for p in places:
+            for r in x:
+                if p in r:
+                    check[p] += 1
+        s = ' '.join([str(n) for n in check.values()])
+        if s.count('2') == 6 and s.count('1') == 2:
+            poss[sum([int(y[2]) for y in x])] = x
+            # poss.append(sum([int(y[2]) for y in x]))
+    
+    print('Part 1: {}'.format(min(poss)))
+    print('Route: {}'.format(poss[min(poss.keys())]))
+    print()
+    print('Part 2: {}'.format(max(poss)))
+    print('Route: {}'.format(poss[max(poss.keys())]))
+
+        
+   
     
 
 
@@ -801,22 +832,212 @@ def dayTwelve2():
     print(len(reds))
 
 # find the { before that, and find when that object ends
+# CURRENTLY NOT IGNORING "red" IN LISTS. UGH. Add a continue if [ found before {.
 
+    def findObjectEnd(index, d, char, oppchar):
+        count = 1
+        dist = 0
+        for l in stuff[index::d]:
+            dist += 1
+            if l == char:
+                count += 1
+            elif l == oppchar:
+                count -= 1
+            if count == 0:
+                return index + d*dist
+                
+
+    redObjects = []
+
+    debuglength = 5
+
+    reds = [reds[x] for x in range(debuglength)]
+    #print(reds)
     for index in reds:
-        pass
+        listStart = findObjectEnd(index, -1, '[', ']')
+        listEnd = findObjectEnd(index, 1, ']', '[')
+        dictStart = findObjectEnd(index, -1, '{', '}')
+        dictEnd = findObjectEnd(index, 1, '}', '{')
+        print('Enclosing list:\n{}'.format(stuff[listStart:listEnd + 1]))
+        print('Enclosing dict:\n{}'.format(stuff[dictStart:dictEnd + 1]))
+        if stuff[index::-1].find('[') < stuff[index::-1].find('{'): # need to do a count for this too. Make a function.
+            continue
+        #objectStart = index - stuff[index::-1].find('{') # need to do the count below for this too
+        #print(stuff[objectStart:index + 5])
         
+        count = 1
+        dist = 0
+        for l in stuff[index::-1]:
+            dist += 1
+            if l == '{':
+                count += 1
+                #print('Count increased to {} at distance {}'.format(count, dist))
+            elif l == '}':
+                count -= 1
+                #print('Count decreased to {} at distance {}'.format(count, dist))
+            if count == 0:
+                objectStart = index - dist
+                break
+        count = 1
+        dist = 0
+        for l in stuff[index:]:
+            dist += 1
+            if l == '{':
+                count += 1
+                #print('Count increased to {} at distance {}'.format(count, dist))
+            elif l == '}':
+                count -= 1
+                #print('Count decreased to {} at distance {}'.format(count, dist))
+            if count == 0:
+                objectEnd = index + dist
+                break
+        redObjects.append((objectStart, objectEnd))
+
+    print(len(redObjects))
+
+    moot = []
+
+    for inset in redObjects:
+        for obj in redObjects:
+            if inset[0] > obj[0] and inset[1] < obj[1]:
+                moot.append(inset)
+
+    print(len(set(moot)))
+
+    for i in range(1, len(redObjects)):
+        if redObjects[i] == redObjects[i - 1]:
+            print('{}: {}'.format(i, redObjects[i]))
+
+    exclude = [obj for obj in redObjects if obj not in moot]
+    print(len(exclude))
+
+    print(stuff[1597:1938] + '\n' + stuff[1870:3855])
+
+        
+
+    
+        
+# run dayTwelve1() on the remaining input
+
+
+def dayTwelve2():
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 12 Input.txt'
+
+    with open(file, 'r') as f:
+        stuff = f.readline()
+
+    # creates a list with the start index of all occurences of "red"
+    reds = []
+    start = 0
+    count = 0
+    while True:
+        count += 1
+        r = start + stuff[start:].find('\"red\"')
+        if r == start-1:
+            break
+        reds.append(r)
+        start += stuff[start:].find('\"red\"') + 5
+
+    print(len(reds))
+
+    def findLimit(index, d, char, oppchar):
+        count = 1
+        dist = 0
+        for l in stuff[index + d::d]:
+            dist += 1
+            if l == char:
+                count -= 1
+            elif l == oppchar:
+                count += 1
+            if count == 0:
+                return index + d*dist
+
+    objs = []
+    start = 0
+    count = 0
+    while True:
+        o = start + stuff[start:].find('{')
+        if o == start - 1:
+            break
+        objs.append((o, findLimit(o, 1, '}', '{') + 1))
+        start = o + 1
+    for n in range(10):
+        print(objs[n])
+        print(stuff[objs[n][0]:objs[n][1]])
+
+    highestObjs = []
+    for x in objs:
+        for y in objs:
+            if x[0] > y[0] and x[1] > y[1]:
+                continue
+        highestObjs.append(x)
+
+    print(len(objs))
+    print(len(highestObjs))
+                
 
 
     
-# list all the start and end indices of these objects
-# run dayTwelve1() on the remaining input
-        
+    
 
 
         
 
 #dayTwelve2()
-    
+
+
+
+def dayThirteen1():
+
+    from itertools import permutations, combinations
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 13 Input.txt'
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    d = {'gain':1, 'lose':-1}
+
+    rules = {line.split()[0] + line.split()[-1][:-1]:d[line.split()[2]]*int(line.split()[3]) for line in lines}
+
+    guests = sorted(set([line.split()[0] for line in lines]))
+
+    optimum = 0
+    count = 0
+    for perm in permutations(guests):
+        count += 1
+        #print(perm)
+        happiness = 0
+        for i in range(-1, len(perm)-1):
+            ref = perm[i] + perm[i+1]
+            happiness += rules[ref]
+            ref = perm[i+1] + perm[i]
+            happiness += rules[ref]
+            #print('Happiness = {}'.format(happiness))
+            #print('pair: {}, change: {}'.format(ref, rules[ref]))
+        optimum = max(optimum, happiness)
+        #if count == 10: break       
+
+    print('Part 1: {}'.format(optimum))
+
+    guests.append('You')
+
+    optimum = 0
+    for perm in permutations(guests):
+        happiness = 0
+        for i in range(-1, len(perm) - 1):
+            ref = perm[i] + perm[i+1]
+            if "You" in ref:
+                continue
+            happiness += rules[ref]
+            ref = perm[i+1] + perm[i]
+            happiness += rules[ref]
+        optimum = max(optimum, happiness)
+
+    print('Part 2: {}'.format(optimum))
+
+
+             
 
 
 def dayFourteen1():
@@ -941,6 +1162,8 @@ def dayFifteen1():
                 optimum = max(total, optimum)
 
     print(optimum)
+    print('{} combinations were tried.'.format(tried))
+
 
 def fifteen1speed(n): # n = number of trials of each. Takes approx 11*n seconds (on laptop)
 
@@ -1116,3 +1339,761 @@ def DaySixteen2():
                 continue
         if count == 3:
             print(n)
+
+
+def daySeventeen():
+
+    from itertools import combinations
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 17 Input.txt'
+    with open(file, 'r') as f:
+        containers = sorted([int(line.strip()) for line in f.readlines()])
+
+    def limit(conts):
+        total = 0
+        count = 0
+        for c in conts:
+            total += c
+            count += 1
+            if total >= 150:
+                return count
+
+    most = limit(containers)
+    least = limit(containers[::-1])
+
+    combos = 0
+    for n in range(least, most + 1):
+        for i in combinations(containers, n):
+            if sum(i) == 150:
+                combos += 1
+        print('Combos after checking length {}: {}'.format(n, combos))
+
+
+def dayEighteen(): # runs day 2. Minor adjustments to my normal game of life code
+    
+    from random import randint
+    from time import sleep, time
+    from copy import deepcopy
+
+    # updates the board according to the four rules
+    def newCycle(board):
+        # create a duplicate of the board to update
+        new = deepcopy(board)
+        for y in range(boardSize):
+            for x in range(boardSize):
+                n = countLiveNeighbours(board, x, y)
+                # activates cells with three neighbours
+                if board[y][x] == '.' and n == 3:
+                    new[y][x] = '#'
+                # kills over- or underpopulated cells
+                elif board[y][x] == '#' and (n < 2 or n > 3):
+                    new[y][x] = '.'
+        ##### remove the below line for day 18 part 1 (1/2)
+        (new[0][0], new[0][boardSize-1], new[boardSize-1][0], new[boardSize-1][boardSize-1]) = ('#','#','#','#')
+        return new, board
+
+    # why does this need a deepcopy to work? I thought it would be okay just altering board locally
+    def printBoard(display, history):
+        for y in range(boardSize):
+            for x in range(boardSize):
+                if display[y][x] == '#':
+                    if history[-1][y][x] == '.':
+                        display[y][x] = g['newborn']
+                    else:
+                        display[y][x] = g['live']
+                elif display[y][x] == '.':
+                    if history[-1][y][x] == '#':
+                        display[y][x] = g['dying']
+                    else:
+                        display[y][x] = g['dead']
+        print('\n'.join([''.join(x) for x in display]) + '\n' + '_'*boardSize)
+                    
+
+    # Counts the number of neighbours of a cell that are alive
+    def countLiveNeighbours(board, x, y):
+        l = [(n, m) for n in [y-1, y, y+1] for m in [x-1, x, x+1] if (n, m) != (y, x)]
+        neighbours = []
+        for i in l:
+            try:
+                if i[0] != -1 and i[1] != -1:
+                    neighbours.append(board[i[0]][i[1]])
+                else:
+                    raise IndexError
+            except IndexError:
+                neighbours.append('.')
+        return neighbours.count('#')
+        
+
+    # checks to see if the board is in an oscillating state 
+    def checkOscillation(history, board):
+        oscillationRange = 10
+        # limits the length of history to the maximum length the oscillator check will look at
+        while len(history) > 2*oscillationRange:
+            del history[0]
+        for i in range(1, oscillationRange):
+            if len(history) < 2*i:
+                break
+            elif board == history[-i] == history[-2*i]:
+                return 0
+
+        
+    ### SETTINGS ###
+
+    maxGenerations = 100 # max number of generations that the game will run for (first 2 gens will not display)
+    boardSize = 100 # length of each side of the board (board is a square)
+    maxPopulation = (boardSize**2)//1.25 # max number of initial live cells (default 80% of board)
+    minPopulation = (boardSize**2)//5 # minimum number of initial live cells (default 20% of board)
+    sleepTime = 0 # time in seconds between each update of the board, normally runs ~0.06s/cycle
+    graphics = g = {'live':'#', 'dead':'.','newborn':'#', 'dying':'.'} # characters used for each cell state
+
+    ### INITIALISATIONS ###
+
+    # initialise the board to a blank grid
+    board = [list(' '*boardSize) for x in range(boardSize)] # board as a list of lists, can use [y][x] as a co-ordinate ref
+
+    # populate the board with a random number of live cells in random positions
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 18 Input.txt'
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    for i in range(len(lines)):
+        board[i] = list(lines[i])
+
+    ###### remove the below line for day 18 part 1 (2/2)
+    (board[0][0], board[0][boardSize-1], board[boardSize-1][0], board[boardSize-1][boardSize-1]) = ('#','#','#','#')
+    #print('\n'.join([''.join(x) for x in board]))
+
+    '''
+    # oscillator test
+    for f in range(3):
+        board[2][f] = 'X'
+    '''
+    # initialise the count of generations, and the history, which is used to detect oscillators  
+    generations = 0
+    history = []
+    genTimes = []
+
+    ### MAIN LOOP ###
+    startTime = time()
+    while generations < maxGenerations:
+    #    if generations > 1:
+    #        genTimes.append(time())
+    #        printBoard(deepcopy(board), history)
+        board, oldBoard = newCycle(board)
+        if board == oldBoard:
+            print('Static at generation %s' % (generations - 1))
+            break
+        history.append(oldBoard)
+        if checkOscillation(history, board) == 0:
+            print('Oscillator reached at generation %s' % (generations - 1))
+            break
+        sleep(sleepTime)
+        generations += 1
+
+    print(''.join([''.join(x) for x in board]).count('#'))
+    runTime = str(generations/(time() - startTime))
+    print(runTime[:runTime.find('.') + 3] + ' generations/second')
+
+
+
+def DayNineteen1():
+
+    import re
+
+    el = re.compile('[A-Z]{1}[a-z]*')
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 19 Input.txt'
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    molecule = lines[-1].strip()
+
+    exchanges = [(line.split()[0], line.split()[2]) for line in lines[:-2]]
+
+    elements = set([x[0] for x in exchanges] + re.findall(el, molecule) + re.findall(el, ''.join([x[1] for x in exchanges])))
+
+    molecule = re.findall(el, molecule)
+
+    indistincts = []
+    for i in range(len(molecule)):
+        for exchange in exchanges:
+            if molecule[i] == exchange[0]:
+                copy = molecule[:]
+                copy[i] = exchange[1]
+                indistincts.append(''.join(copy))
+
+    distincts = []
+
+    for i in indistincts:
+        if i not in distincts:
+            distincts.append(i)
+
+    print('distinct mols: {}'.format(len(distincts)))
+    print('using set(): {}'.format(len(set(indistincts))))
+
+
+def dayNineteen2():
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 19 Input.txt'
+    with open(file, 'r') as f:
+        lines = f.readlines()
+
+    mol = lines[-1].strip()
+
+    exchanges = {line.split()[2]:line.split()[0] for line in lines[:-2]}
+
+    order = sorted([(len(k) - len(exchanges[k]), k) for k in exchanges])[::-1]
+    
+    count = 0
+
+    while mol != 'e':
+        for x in order:
+            pos = mol.find(x[1])
+            if pos != -1:
+                mol = mol[:pos] + exchanges[x[1]] + mol[pos + len(x[1]):]
+                print(len(mol))
+                count += 1
+                if len(mol) == 23:
+                    print(mol)
+                    break
+                break
+            else:
+                continue
+
+    print(count)
+            
+                   
+
+def dayTwenty1():
+
+    def factors(n):    
+        return set(reduce(list.__add__, 
+                ([i, n//i] for i in range(1, int(n**0.5) + 1) if n % i == 0)))
+
+    import time
+    from functools import reduce
+
+    start = time.time()
+
+    p = 0
+    houseNo = 1
+    jump = 100000
+    target = 29000000
+    most = 0
+    check = houseNo + 1
+
+    '''
+    while True:
+        if p < target:
+            p = sum([x*10 for x in range(1, houseNo + 1) if houseNo % x == 0])
+            houseNo += jump
+        elif p > target:
+            if sum([x*10 for x in range(1, houseNo) if (houseNo - 1) % x == 0]) < target:
+                break
+            p = sum([x*10 for x in range(1, houseNo + 1) if houseNo % x == 0])
+            houseNo += jump
+            jump = int(max(jump/10, jump/abs(jump))*-1)
+            print('flipped at {}'.format(houseNo))
+    '''
+
+    while p <= 29000000:
+#        if houseNo % 6 != 0:
+#            houseNo += 1
+#            continue
+# this is my original code, which was too slow. The factors(n) above was nicked off stack overflow
+#        p = sum([x*10 for x in range(1, int((houseNo + 2)/2)) if houseNo % x == 0]) + houseNo*10
+        p = sum(factors(houseNo))*10
+        most = max(p, most)
+        if True: #houseNo >= check:
+            print('At house {}, presents: {}, max presents: {}, time taken: {}s'.format(houseNo, p, most, str(time.time() - start)[:6]))
+            start = time.time()
+            check += 1
+        houseNo += 1
+
+    print(houseNo)
+
+
+
+
+def dayTwenty2():
+
+    def factors(n):
+        l = [[i, n//i] for i in range(max(1, int(n/50)), int(n**0.5) + 1) if n % i == 0]
+        l.append([houseNo])
+        return set(reduce(list.__add__, l))
+        try:
+            return set(reduce(list.__add__,
+                          ))
+        except TypeError:
+            return [houseNo]
+
+    import time
+    from functools import reduce
+
+    start = time.time()
+
+    p = 0
+    houseNo = 1
+    jump = 100000
+    target = 29000000
+    most = 0
+    check = houseNo + 10000
+
+    while p <= target:
+        p = sum((x*11 for x in range(1, int((houseNo + 2)/2)) if houseNo % x == 0)) + houseNo*11
+#        p = sum(factors(houseNo))*11 
+        most = max(p, most)
+        if houseNo >= check:
+            print('At house {}, presents: {}, max presents: {}, time taken: {}s'.format(houseNo, p, most, str(time.time() - start)[:6]))
+            start = time.time()
+            check += 10000
+        houseNo += 1
+
+    print(houseNo - 1)
+
+# the below is a more efficient version based on the reddit solutions (mine didn't work)
+
+def dayTwenty2():
+
+    import time
+    start = time.time()
+
+    houses = [0 for i in range(1, 1000000)]
+
+    for n in range(1, 1000000):
+        if n % 10000 == 0:
+            print('At elf {}, time taken: {}s'.format(n, str(time.time() - start)[:5]))
+            start = time.time()
+        jumps = 0
+        pos = n
+        while jumps < 50:
+            try:
+                houses[pos - 1] += 11*n
+                pos += n
+                jumps += 1
+            except IndexError:
+                break
+
+
+    for h in houses:
+        if h >= 29000000:
+            print(houses.index(h) + 1)
+            break
+
+    for i in range(10):
+        print(houses[i])
+
+    print(max(houses))
+            
+
+    
+
+def dayTwentyOne1():
+
+    from itertools import combinations
+
+    shop = '''Weapons:    Cost  Damage  Armor
+Dagger        8     4       0
+Shortsword   10     5       0
+Warhammer    25     6       0
+Longsword    40     7       0
+Greataxe     74     8       0
+
+Armor:      Cost  Damage  Armor
+Leather      13     0       1
+Chainmail    31     0       2
+Splintmail   53     0       3
+Bandedmail   75     0       4
+Platemail   102     0       5
+
+Rings:      Cost  Damage  Armor
+Damage +1    25     1       0
+Damage +2    50     2       0
+Damage +3   100     3       0
+Defense +1   20     0       1
+Defense +2   40     0       2
+Defense +3   80     0       3'''.split('\n')
+    
+    boss = {'damage':9,
+            'armour':2}
+    me = {}
+
+    weapons = [line.split() for line in shop[1:6]]
+    armour = [line.split() for line in shop[8:13]]
+    rings = [line.split() for line in shop[15:22]]
+    # note that rings have an additional because of the space in the name
+
+    # both are named the same so that combinations won't look at duplicates, one with each blank
+    # ...actually, combinations doesn't work like that. Oh well.
+    blanks = [['blank', '0', '0', '0', '0'], ['blank', '0', '0', '0', '0']]
+
+    armour.append(blanks[0])
+    rings.extend(blanks)
+
+    ringCombos = combinations(rings, 2)
+
+    def win(weapon, armour, ringCombo):
+        #print('Weapon: {}'.format(weapon))
+        #print('Armour: {}'.format(armour))
+        #print('Rings: {}'.format(ringCombo))
+        boss['HP'] = 103
+        me['HP'] = 100
+        me['armour'] = int(armour[3]) + int(ringCombo[0][4]) + int(ringCombo[1][4])
+        me['damage'] = int(weapon[2]) + int(ringCombo[0][3]) + int(ringCombo[1][3])
+        turn = 1
+        #print('Me:   {}'.format(me))
+        #print('Boss: {}'.format(boss))
+        while True:
+            if turn % 2 == 1:
+                boss['HP'] -= max(me['damage'] - boss['armour'], 1)
+                #print('Boss: {}'.format(boss))
+                if boss['HP'] <= 0:
+                    return True
+            else:
+                me['HP'] -= max(boss['damage'] - me['armour'], 1)
+                #print('Me:   {}'.format(me))
+                if me['HP'] <= 0:
+                    return False
+            turn += 1
+
+            
+    winners = []
+    def netOnBoss(w, a, i):
+        return int(w[2]) + int(i[0][3]) + int(i[1][3]) - 2
+    def netOnMe(w, a, i):
+        return 9 - int(a[3]) - int(i[0][4]) - int(i[1][4])
+
+    
+    
+    
+    for w in weapons:
+        #print('WEAPON'*10)
+        #print(w)
+        for a in armour:
+            #print('ARMOUR'*10)
+            #print(a)
+            for i in combinations(rings, 2):
+                #print('RINGS'*10)
+                #print(i)
+                #print('yuppo')
+                #print('Dmg to boss: {}, dmg to me: {}, win = {}'.format(netOnBoss(w,a,i), netOnMe(w,a,i), netOnBoss(w,a,i) > netOnMe(w,a,i)))
+                
+                
+                #print()
+                #print('Cost = {}'.format(int(w[1]) + int(a[1]) + int(i[0][2]) + int(i[1][2])))
+                if win(w, a, i):
+                    gold = int(w[1]) + int(a[1]) + int(i[0][2]) + int(i[1][2])
+                    winners.append(gold)
+                    #print('#'*20)
+                    #print(winners)
+
+    print(min(winners))
+            
+
+def dayTwentyOne2():
+
+    from itertools import combinations
+
+    shop = '''Weapons:    Cost  Damage  Armor
+Dagger        8     4       0
+Shortsword   10     5       0
+Warhammer    25     6       0
+Longsword    40     7       0
+Greataxe     74     8       0
+
+Armor:      Cost  Damage  Armor
+Leather      13     0       1
+Chainmail    31     0       2
+Splintmail   53     0       3
+Bandedmail   75     0       4
+Platemail   102     0       5
+
+Rings:      Cost  Damage  Armor
+Damage +1    25     1       0
+Damage +2    50     2       0
+Damage +3   100     3       0
+Defense +1   20     0       1
+Defense +2   40     0       2
+Defense +3   80     0       3'''.split('\n')
+    
+    boss = {'damage':9,
+            'armour':2}
+    me = {}
+
+    weapons = [line.split() for line in shop[1:6]]
+    armour = [line.split() for line in shop[8:13]]
+    rings = [line.split() for line in shop[15:22]]
+    # note that rings have an additional because of the space in the name
+
+    # both are named the same so that combinations won't look at duplicates, one with each blank
+    # ...actually, combinations doesn't work like that. Oh well.
+    blanks = [['blank', '0', '0', '0', '0'], ['blank', '0', '0', '0', '0']]
+
+    armour.append(blanks[0])
+    rings.extend(blanks)
+
+    ringCombos = combinations(rings, 2)
+
+    def lose(weapon, armour, ringCombo):
+        #print('Weapon: {}'.format(weapon))
+        #print('Armour: {}'.format(armour))
+        #print('Rings: {}'.format(ringCombo))
+        boss['HP'] = 103
+        me['HP'] = 100
+        me['armour'] = int(armour[3]) + int(ringCombo[0][4]) + int(ringCombo[1][4])
+        me['damage'] = int(weapon[2]) + int(ringCombo[0][3]) + int(ringCombo[1][3])
+        turn = 1
+        #print('Me:   {}'.format(me))
+        #print('Boss: {}'.format(boss))
+        while True:
+            if turn % 2 == 1:
+                boss['HP'] -= max(me['damage'] - boss['armour'], 1)
+                #print('Boss: {}'.format(boss))
+                if boss['HP'] <= 0:
+                    return False
+            else:
+                me['HP'] -= max(boss['damage'] - me['armour'], 1)
+                #print('Me:   {}'.format(me))
+                if me['HP'] <= 0:
+                    return True
+            turn += 1
+
+            
+    losers = []
+    def netOnBoss(w, a, i):
+        return int(w[2]) + int(i[0][3]) + int(i[1][3]) - 2
+    def netOnMe(w, a, i):
+        return 9 - int(a[3]) - int(i[0][4]) - int(i[1][4])
+
+    '''
+    cheapwin = [int(w[1]) + int(a[1]) + int(i[0][2]) + int(i[1][2]) for w in weapons for a in armour for i in combinations(rings, 2) if netOnBoss(w,a,i)>=netOnMe(w,a,i)]
+    print(cheapwin)
+    print(min(cheapwin))
+    '''
+    
+    for w in weapons:
+        #print('WEAPON'*10)
+        #print(w)
+        for a in armour:
+            #print('ARMOUR'*10)
+            #print(a)
+            for i in combinations(rings, 2):
+                #print('RINGS'*10)
+                #print(i)
+                #print('yuppo')
+                #print('Dmg to boss: {}, dmg to me: {}, win = {}'.format(netOnBoss(w,a,i), netOnMe(w,a,i), netOnBoss(w,a,i) > netOnMe(w,a,i)))
+                
+                
+                #print()
+                #print('Cost = {}'.format(int(w[1]) + int(a[1]) + int(i[0][2]) + int(i[1][2])))
+                if lose(w, a, i):
+                    gold = int(w[1]) + int(a[1]) + int(i[0][2]) + int(i[1][2])
+                    losers.append(gold)
+                    #print('#'*20)
+                    #print(winners)
+
+    print(max(losers))
+            
+def dayTwentyOneShort():
+
+    shop = '''Weapons:    Cost  Damage  Armor
+Dagger        8     4       0
+Shortsword   10     5       0
+Warhammer    25     6       0
+Longsword    40     7       0
+Greataxe     74     8       0
+
+Armor:      Cost  Damage  Armor
+Leather      13     0       1
+Chainmail    31     0       2
+Splintmail   53     0       3
+Bandedmail   75     0       4
+Platemail   102     0       5
+
+Rings:      Cost  Damage  Armor
+Damage +1    25     1       0
+Damage +2    50     2       0
+Damage +3   100     3       0
+Defense +1   20     0       1
+Defense +2   40     0       2
+Defense +3   80     0       3'''.split('\n')
+
+    from itertools import combinations
+
+    weapons = [line.split() for line in shop[1:6]]
+    armour = [line.split() for line in shop[8:13]]
+    rings = [line.split() for line in shop[15:]]
+    armour.append([0 for i in range(4)]) # blank entry to count as none chosen
+    rings.extend([[0 for i in range(5)] for j in range(2)]) # same as above
+
+    def db(w, a, i): # damage per round to boss
+        return max(1, int(w[2]) + int(i[0][3]) + int(i[1][3]) - 2)
+    def dm(w, a, i): # damage per round to me
+        return max(1, 9 - int(a[3]) - int(i[0][4]) - int(i[1][4]))
+
+
+    print(min([int(w[1]) + int(a[1]) + int(i[0][2]) + int(i[1][2])
+               for w in weapons
+               for a in armour
+               for i in combinations(rings, 2)
+               if (102//db(w,a,i)) <= (99//dm(w,a,i))]))
+
+
+def dayTwentyTwo1():
+
+    import random
+    import itertools
+
+    spells = {'mm':53,
+              'drain':73,
+              'shield':113,
+              'poison':173,
+              'recharge':229}
+
+    
+#    gen = list(spells.keys())
+#    for n in range(25):
+#        gen.extend(gen)
+
+#    print(len(gen))
+
+#    strats = itertools.combinations(gen, 25)
+
+
+
+    
+    def fight(mode):
+        boss = 51
+        me = 50
+        mana = 500
+        spent = 0
+        armour = 0
+        poison = 0
+        recharge = 0
+        
+        for turn in range(50):
+
+            #print('-------- TURN {} ----------'.format(turn))
+            
+            # break as soon as it's impossible for it to be the best option
+            if spent > optimum:
+                return False, 0
+            
+            if poison > 0:
+                boss -= 3
+                poison -= 1
+                #print("Boss takes 3 poison damage, poison's count is {}".format(poison))
+                if boss <= 0:
+                    return True, spent
+            if recharge > 0:
+                mana += 101
+                recharge -= 1
+                #print("You regain 101 mana, recharge's count is {}".format(recharge))
+            armour = max(0, armour - 1)
+            if turn % 2 == 0: # player's turn
+                #print("Player's turn")
+                if mode == 'hard':
+                    me -= 1
+                    #print("Player took 1 damage for hard mode")
+                    if me <= 0:
+                        return False, 0
+                while True:
+                    spell = random.choice(list(spells.keys()))
+#                    try:
+#                        spell = seed[-turn//2]
+#                    except IndexError:
+#                        return False, 0
+                    if spell == 113 and armour > 0 or spell == 173 and poison > 0 or spell == 229 and recharge > 0:
+                        continue
+                    else:
+                        break
+                #print('Player casts {}'.format(spell))
+                cost = spells[spell]
+                if spell == 'mm':
+                    boss -= 4
+                    mana -= cost
+                    spent += cost
+                    #print("Player casts magic missile for {} mana.\nBoss takes 4 damage, down to {}".format(cost,boss))
+                elif spell == 'drain':
+                    boss -= 2
+                    me += 2
+                    mana -= cost
+                    spent += cost
+                    #print('Player casts drain for {} mana.\nBoss takes 2 damage, down to {}.\nPlayer gains 2 health, up to {}.'.format(cost,boss,me))
+                elif spell == 'shield':
+                    armour = 6
+                    mana -= cost
+                    spent += cost
+                    #print("Player casts shield for {} mana.".format(cost))
+                elif spell == 'poison':
+                    poison += 6
+                    mana -= cost
+                    spent += cost
+                    #print('Player casts poison for {} mana.'.format(cost))
+                elif spell == 'recharge':
+                    recharge += 5
+                    mana -= cost
+                    spent += cost
+                    #print('Player casts recharge for {} mana.'.format(cost))
+                    
+            else: # boss's turn
+                #print("Boss's turn")
+                me -= 9
+                if armour > 0:
+                    me += 7
+                    #print('Boss attacks player for 2 damage, down to {}'.format(me))
+                #else:
+                    #print('Boss attacks player for 9 damage, down to {}'.format(me))
+            
+            #print('''Boss health: {}
+#Player health: {}
+#Mana: {}
+#Spent: {}
+#Spell: {}'''.format(boss, me, mana, spent, spell))
+
+            # check if the fight is over
+            if mana <= 0:
+                return False, 0
+            elif me <= 0:
+                return False, 0
+            elif boss <= 0:
+                return True, spent
+
+    d = {str(n):['mm', 'drain', 'shield', 'poison', 'recharge'][n%5] for n in range(10)}
+    #print(d)
+    strat = 0
+
+    seed = [d[i] for i in list(str(strat))]
+    
+    '''
+    optimum = 100000
+    wins = 0
+    for i in range(1000000):
+        result = fight('easy')
+        # think this is obsolete because of the break in the loop, could just be optimum = result[0]
+        if result[0]:
+            wins += 1
+            optimum = min(optimum, result[1])
+
+    print('Part 1: {}'.format(optimum))
+    print('Total wins: {}'.format(wins))
+    '''
+
+    optimum = 100000
+    wins = 0
+    for i in range(1000000):
+        result = fight('hard')
+        # think this is obsolete because of the break in the loop, could just be optimum = result[0]
+        if result[0]:
+            wins += 1
+            optimum = min(optimum, result[1])
+        strat += 1
+        if strat % 100000 == 0:
+            print('''Strat: {}\nOptimum: {}\nWins: {}'''.format(strat, optimum, wins))
+
+    print('Part 2: {}'.format(optimum))
+    print('Total wins: {}'.format(wins))    
+        
+            
+
+
