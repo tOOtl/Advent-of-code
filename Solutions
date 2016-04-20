@@ -758,233 +758,48 @@ def dayTwelve1():
 
     print(sum(nums))
 
-'''        
-def dayTwelve2(): # red currently doesn't work as it will stop at "{"red"{{}" rather than "{"red"{{}}}"
 
-    import re
-
-    n = re.compile('-?\d+')
-    red = re.compile('\{[^}[]*\"red\"[^}]*\}')
-
-    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 12 Input.txt'
-
-    with open(file, 'r') as f:
-        lines = f.readline()
-
-    nums = n.findall(lines)
-
-    redobjects = red.findall(lines)
-
-    rednums = []
-    for d in redobjects:
-        rednums.extend(n.findall(d))
-
-    for d in redobjects:
-        print(d)
-        print(n.findall(d))
+def DayTwelve2():
     
-    for i in range(len(nums)):
-        nums[i] = int(nums[i])
-    for i in range(len(rednums)):
-        rednums[i] = int(rednums[i])
+    # get data
 
-    print(sum(nums) - sum(rednums))
-'''
+    with open('day 12 input.txt', 'r') as f:
+        data = f.read()
 
-def dayTwelve2():
+    data = eval(data)
 
-    import re
-
-    openBrace = re.compile('\{')
-    closeBrace = re.compile('\}')
-    red = re.compile('\{[^}[]*\"red\"[^}]*\}')
-
-    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 12 Input.txt'
-
-    with open(file, 'r') as f:
-        stuff = f.readline()
-
-        
-    '''
-    # find { character
-    # from that index, look for { or }
-    # if { go back to start
-    # if } separate out (maybe check for "red" here)
-
-    # could try counting open braces and close braces
-    # if "red" is found, ignore until count drops below the level at which it was found'''
-
-    # make a list of all indices at which "red" occurs
-
-    count = 0
-
-    reds = []
-    start = 0
     count = 0
     while True:
-        count += 1
-        r = start + stuff[start:].find('\"red\"')
-        if r == start-1:
+        
+        # ignore any red objects
+        temp = []
+        for item in data:
+            if type(item) != dict:
+                temp.append(item)
+            else:
+                if 'red' not in item.values():
+                    temp.append(item)
+        data = temp
+        
+        # flatten
+        flatcount = 0
+        newdata = []
+        for e in data:
+            if type(e) == list:
+                newdata += e
+                flatcount += 1
+            elif type(e) == dict:
+                newdata += e.values()
+                flatcount += 1
+            else:
+                newdata.append(e)
+        data = newdata
+        if flatcount == 0:
             break
-        reds.append(r)
-        start += stuff[start:].find('\"red\"') + 5
 
-    print(len(reds))
+    data = [n for n in data if type(n) == int]
 
-# find the { before that, and find when that object ends
-# CURRENTLY NOT IGNORING "red" IN LISTS. UGH. Add a continue if [ found before {.
-
-    def findObjectEnd(index, d, char, oppchar):
-        count = 1
-        dist = 0
-        for l in stuff[index::d]:
-            dist += 1
-            if l == char:
-                count += 1
-            elif l == oppchar:
-                count -= 1
-            if count == 0:
-                return index + d*dist
-                
-
-    redObjects = []
-
-    debuglength = 5
-
-    reds = [reds[x] for x in range(debuglength)]
-    #print(reds)
-    for index in reds:
-        listStart = findObjectEnd(index, -1, '[', ']')
-        listEnd = findObjectEnd(index, 1, ']', '[')
-        dictStart = findObjectEnd(index, -1, '{', '}')
-        dictEnd = findObjectEnd(index, 1, '}', '{')
-        print('Enclosing list:\n{}'.format(stuff[listStart:listEnd + 1]))
-        print('Enclosing dict:\n{}'.format(stuff[dictStart:dictEnd + 1]))
-        if stuff[index::-1].find('[') < stuff[index::-1].find('{'): # need to do a count for this too. Make a function.
-            continue
-        #objectStart = index - stuff[index::-1].find('{') # need to do the count below for this too
-        #print(stuff[objectStart:index + 5])
-        
-        count = 1
-        dist = 0
-        for l in stuff[index::-1]:
-            dist += 1
-            if l == '{':
-                count += 1
-                #print('Count increased to {} at distance {}'.format(count, dist))
-            elif l == '}':
-                count -= 1
-                #print('Count decreased to {} at distance {}'.format(count, dist))
-            if count == 0:
-                objectStart = index - dist
-                break
-        count = 1
-        dist = 0
-        for l in stuff[index:]:
-            dist += 1
-            if l == '{':
-                count += 1
-                #print('Count increased to {} at distance {}'.format(count, dist))
-            elif l == '}':
-                count -= 1
-                #print('Count decreased to {} at distance {}'.format(count, dist))
-            if count == 0:
-                objectEnd = index + dist
-                break
-        redObjects.append((objectStart, objectEnd))
-
-    print(len(redObjects))
-
-    moot = []
-
-    for inset in redObjects:
-        for obj in redObjects:
-            if inset[0] > obj[0] and inset[1] < obj[1]:
-                moot.append(inset)
-
-    print(len(set(moot)))
-
-    for i in range(1, len(redObjects)):
-        if redObjects[i] == redObjects[i - 1]:
-            print('{}: {}'.format(i, redObjects[i]))
-
-    exclude = [obj for obj in redObjects if obj not in moot]
-    print(len(exclude))
-
-    print(stuff[1597:1938] + '\n' + stuff[1870:3855])
-
-        
-
-    
-        
-# run dayTwelve1() on the remaining input
-
-
-def dayTwelve2():
-
-    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 12 Input.txt'
-
-    with open(file, 'r') as f:
-        stuff = f.readline()
-
-    # creates a list with the start index of all occurences of "red"
-    reds = []
-    start = 0
-    count = 0
-    while True:
-        count += 1
-        r = start + stuff[start:].find('\"red\"')
-        if r == start-1:
-            break
-        reds.append(r)
-        start += stuff[start:].find('\"red\"') + 5
-
-    print(len(reds))
-
-    def findLimit(index, d, char, oppchar):
-        count = 1
-        dist = 0
-        for l in stuff[index + d::d]:
-            dist += 1
-            if l == char:
-                count -= 1
-            elif l == oppchar:
-                count += 1
-            if count == 0:
-                return index + d*dist
-
-    objs = []
-    start = 0
-    count = 0
-    while True:
-        o = start + stuff[start:].find('{')
-        if o == start - 1:
-            break
-        objs.append((o, findLimit(o, 1, '}', '{') + 1))
-        start = o + 1
-    for n in range(10):
-        print(objs[n])
-        print(stuff[objs[n][0]:objs[n][1]])
-
-    highestObjs = []
-    for x in objs:
-        for y in objs:
-            if x[0] > y[0] and x[1] > y[1]:
-                continue
-        highestObjs.append(x)
-
-    print(len(objs))
-    print(len(highestObjs))
-                
-
-
-    
-    
-
-
-        
-
-#dayTwelve2()
+    print('total: {}'.format(sum(data)))
 
 
 
@@ -1942,7 +1757,7 @@ Defense +3   80     0       3'''.split('\n')
 def dayTwentyTwo1():
 
     import random
-    import itertools
+#    import itertools
 
     spells = {'mm':53,
               'drain':73,
@@ -2059,11 +1874,11 @@ def dayTwentyTwo1():
             elif boss <= 0:
                 return True, spent
 
-    d = {str(n):['mm', 'drain', 'shield', 'poison', 'recharge'][n%5] for n in range(10)}
+#    d = {str(n):['mm', 'drain', 'shield', 'poison', 'recharge'][n%5] for n in range(10)}
     #print(d)
-    strat = 0
+#    strat = 0
 
-    seed = [d[i] for i in list(str(strat))]
+#    seed = [d[i] for i in list(str(strat))]
     
     '''
     optimum = 100000
@@ -2086,14 +1901,303 @@ def dayTwentyTwo1():
         # think this is obsolete because of the break in the loop, could just be optimum = result[0]
         if result[0]:
             wins += 1
-            optimum = min(optimum, result[1])
-        strat += 1
-        if strat % 100000 == 0:
-            print('''Strat: {}\nOptimum: {}\nWins: {}'''.format(strat, optimum, wins))
+#            optimum = min(optimum, result[1])
+            if result[1] < optimum:
+                optimum = result[1]
+                print(optimum)
+#        strat += 1
+        #if strat % 100000 == 0:
+#            print('''Strat: {}\nOptimum: {}\nWins: {}'''.format(strat, optimum, wins))
 
     print('Part 2: {}'.format(optimum))
     print('Total wins: {}'.format(wins))    
-        
+
+
+
+def dayTwentyThree1():
+
+    file = '/Users/Zak/Documents/Programs/Website Challenges/Day 23 Input.txt'
+
+    with open(file, 'r') as f:
+        lines = [line.split() for line in f.readlines()]
+
+    a = 1
+    b = 0
+    instruct = 0
+
+    for line in lines:
+        if line[0] not in ['hlf', 'tpl', 'inc', 'jmp', 'jie', 'jio']:
+            print(line)
+
+    while instruct < len(lines):
+        line = lines[instruct]
+        if line[0] == 'hlf':
+            if 'a' in line[1]: a = a//2
+            else: b = b//2
+            instruct += 1
+        elif line[0] == 'tpl':
+            if 'a' in line[1]: a *= 3
+            else: b *= 3
+            instruct += 1
+        elif line[0] == 'inc':
+            if 'a' in line[1]: a += 1
+            else: b += 1
+            instruct += 1
+        elif line[0] == 'jmp':
+            instruct += int(line[1])
+        elif line[0] == 'jie':
+            if 'a' in line[1] and a % 2 == 0:
+                instruct += int(line[2])
+            elif 'b' in line[1] and b % 2 == 0:
+                instruct += int(line[2])
+            else: instruct += 1
+        elif line[0] == 'jio':
+            if 'a' in line[1] and a == 1:
+                instruct += int(line[2])
+            elif 'b' in line[1] and b == 1:
+                instruct += int(line[2])
+            else: instruct += 1
+        else:
+            break
+        #print(str(instruct) + ': ' + ' '.join(line))
+        #print('a = {}, b = {}'.format(a,b))
+
+    print('a = {}, b = {}'.format(a, b))
             
 
+def dayTwentyFour1():
 
+    from itertools import permutations, combinations
+
+    packages = [int(x) for x in """1
+3
+5
+11
+13
+17
+19
+23
+29
+31
+41
+43
+47
+53
+59
+61
+67
+71
+73
+79
+83
+89
+97
+101
+103
+107
+109
+113""".split()]
+
+#    packages = [1,2,3,4,5,7,8,9,10,11]
+
+    print(sum(packages)/3)
+
+    total = sum(packages)/3
+
+    smallest = []
+
+    # find minimum number of packages
+    for l in range(len(packages)):
+        print(l)
+        smallest += [x for x in combinations(packages, l) if sum(x) == total]
+        if len(smallest) > 0:
+            break
+
+    def QE(group):
+        total = 1
+        for i in group:
+            total *= i
+        return total
+
+    l = [(x, QE(x)) for x in smallest]
+    leastEntang = min([QE(x) for x in smallest])
+    print(leastEntang)
+
+    ordered = []
+    print(len(smallest))
+    print()
+    t = len(smallest)
+    while len(ordered) < t-1:
+        print(len(ordered))
+        for s in l:
+            if s[1] == min([QE(x) for x in smallest]):
+                ordered.append(s)
+                smallest.remove(s[0])
+    print('out of the loop')
+
+    #for i in range(10):
+#        print('{} - entanglement = {}'.format(ordered[i][0], ordered[i][1]))
+    #print(ordered)
+    for i in ordered:
+        #print(i)
+        remainders = [x for x in packages if x not in i[0]]
+        #print(remainders)
+        stuff = []
+        for l in range(len(remainders)):
+            stuff += [x for x in combinations(remainders, l) if sum(x) == total]
+        if len(stuff) > 0:
+            print('Part 1: {}'.format(i[1]))
+            break
+            
+
+    '''
+        
+
+    combos = []
+    best = 1000000000
+
+    for group in smallest:
+        print(group)
+        remainders = [x for x in packages if x not in smallest]
+        others = []
+        for l in range(len(remainders)):
+            others += [[[x],[y for y in remainders if y not in x]] for x in combinations(remainders, l)]
+        for pair in others:
+            pass'''
+            
+            
+        
+        
+
+    
+    '''
+    possibles = []
+
+    for perm in permutations(packages):
+        for i in range(len(packages)):
+            for j in range(i, len(packages)):
+                if sum(packages[:i]) == sum(packages[i:j]) == sum(packages[j:]):
+                    
+                    possibles.append([packages[:i], packages[i:j], packages[j:]])'''
+
+    
+    
+    
+
+        
+def dayTwentyFour2():
+
+    from itertools import permutations, combinations
+
+    packages = [int(x) for x in """1
+3
+5
+11
+13
+17
+19
+23
+29
+31
+41
+43
+47
+53
+59
+61
+67
+71
+73
+79
+83
+89
+97
+101
+103
+107
+109
+113""".split()]
+
+#    packages = [1,2,3,4,5,7,8,9,10,11]
+
+    print(sum(packages)/4)
+
+    total = sum(packages)/4
+
+    smallest = []
+
+    # find minimum number of packages
+    for l in range(len(packages)):
+        print(l)
+        smallest += [x for x in combinations(packages, l) if sum(x) == total]
+        if len(smallest) > 0:
+            break
+
+    def QE(group):
+        total = 1
+        for i in group:
+            total *= i
+        return total
+
+    l = [(x, QE(x)) for x in smallest]
+
+    # generates all the combinations of packages with the fewest number, in
+    # order from low to high quantum entanglement
+    ordered = []
+    print(len(smallest))
+    print()
+    t = len(smallest)
+    while len(ordered) < t-1:
+        print(len(ordered))
+        for s in l:
+            if s[1] == min([QE(x) for x in smallest]):
+                ordered.append(s)
+                smallest.remove(s[0])
+    print('out of the loop')
+
+    # this needs the breaks sorting out so it doesn't print so much. It does work though.
+    for i in ordered:
+        remainders = [x for x in packages if x not in i[0]]
+        stuff = []
+        for l in range(len(remainders)):
+            stuff += [x for x in combinations(remainders, l) if sum(x) == total]
+            print('For length {}, there are {} combos in stuff'.format(l, len(stuff)))
+            if len(stuff) > 0:
+                for j in stuff:
+                    secondremainders = [x for x in remainders if x not in j]
+                    secondstuff = []
+                    for l in range(len(secondremainders)):
+                        secondstuff += [x for x in combinations(secondremainders, l) if sum(x) == total]
+                        if len(secondstuff) > 0:
+                            print(secondstuff)
+                            break
+                print('Part 2: {}'.format(QE(i[0])))
+                break
+                
+                
+            
+        if len(stuff) > 0:
+            print('Part 2: {}'.format(i[1]))
+            
+            break
+
+def dayTwentyFive1():
+
+    def genCode(n, start):
+        for i in range(n):
+            start *= 252533
+            start = start % 33554393
+        return start
+
+    def findDist(row, column):
+        diag = row + column - 1
+        dist = 0
+        for x in range(diag):
+            dist += x
+        dist += column - 1
+        return dist
+
+    def findDist(y, x):
+        return (x - 1) + sum([x for x in range(x + y - 1)])
+
+    print('Part 1: {}'.format(genCode(findDist(2981,3075), 20151125)))
